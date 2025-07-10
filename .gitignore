@@ -1,0 +1,73 @@
+# .gitignore for Flask + Angular Fitness App
+
+# ===== CRITICAL: API Keys & Secrets =====
+.env
+.env.local
+.env.*.local
+*.key
+secrets.json
+
+# ===== Python/Flask Backend =====
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+backend/venv/
+backend/env/
+venv/
+env/
+
+# Flask
+backend/instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python testing & coverage
+.coverage
+.pytest_cache/
+*.cover
+
+# ===== Angular Frontend =====
+# Node modules
+frontend/node_modules/
+node_modules/
+
+# Angular build outputs
+frontend/dist/
+frontend/build/
+
+# Angular cache
+frontend/.angular/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== IDE & OS Files =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# ===== Optional: Remove if you use these =====
+# Uncomment below if you use these tools
+# .pytest_cache/
+# coverage/
+# .tox/
