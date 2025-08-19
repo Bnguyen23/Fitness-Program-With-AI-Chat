@@ -1,0 +1,409 @@
+<div class="workouts-container">
+  <!-- Workouts Header -->
+  <div class="workouts-header">
+    <div class="header-content">
+      <h2>🏋️‍♂️ My Workouts</h2>
+      <p class="subtitle">Create and track your workout routines</p>
+    </div>
+    <button
+      class="btn-primary"
+      (click)="toggleWorkoutForm()"
+      [disabled]="isLoading"
+    >
+      {{ isCreatingWorkout ? "✕ Cancel" : "+ New Workout" }}
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    ✅ {{ successMessage }}
+  </div>
+  <div class="alert alert-error" *ngIf="errorMessage">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Create/Edit Workout Form -->
+  <div class="workout-form-section" *ngIf="isCreatingWorkout">
+    <div class="form-header">
+      <h3>
+        {{ editingWorkout ? "✏️ Edit Workout" : "🆕 Create New Workout" }}
+      </h3>
+      <div class="form-progress">
+        <span class="step" [class.active]="workoutForm.get('name')?.value"
+          >1. Basic Info</span
+        >
+        <span class="step" [class.active]="currentExercises.length > 0"
+          >2. Add Exercises</span
+        >
+        <span class="step" [class.active]="hasAnySets()">3. Add Sets</span>
+      </div>
+    </div>
+
+    <form
+      [formGroup]="workoutForm"
+      (ngSubmit)="onSubmit()"
+      class="workout-form"
+    >
+      <!-- Basic Workout Info -->
+      <div class="form-section">
+        <h4>📝 Workout Details</h4>
+
+        <div class="form-group">
+          <label for="workoutName">Workout Name *</label>
+          <input
+            type="text"
+            id="workoutName"
+            formControlName="name"
+            class="form-control"
+            [class.invalid]="
+              workoutForm.get('name')?.invalid &&
+              workoutForm.get('name')?.touched
+            "
+            placeholder="e.g., Upper Body Strength, Leg Day, HIIT Session"
+          />
+          <div
+            class="error-text"
+            *ngIf="
+              workoutForm.get('name')?.invalid &&
+              workoutForm.get('name')?.touched
+            "
+          >
+            Workout name is required (minimum 3 characters)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="workoutDescription">Description (optional)</label>
+          <textarea
+            id="workoutDescription"
+            formControlName="description"
+            class="form-control"
+            rows="3"
+            placeholder="Brief description of your workout goals and focus areas..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Exercises Section -->
+      <div class="exercises-section">
+        <div class="section-header">
+          <h4>💪 Exercises ({{ currentExercises.length }})</h4>
+          <div class="exercise-stats" *ngIf="currentExercises.length > 0">
+            {{ getTotalSetsCount() }} total sets
+          </div>
+        </div>
+
+        <!-- Add Exercise Form -->
+        <div class="add-exercise">
+          <div class="exercise-input-wrapper">
+            <div class="input-group">
+              <input
+                type="text"
+                placeholder="Exercise name (e.g., Bench Press, Squats)"
+                [(ngModel)]="newExerciseName"
+                (input)="onExerciseNameInput()"
+                class="form-control"
+                [ngModelOptions]="{ standalone: true }"
+              />
+              <button
+                type="button"
+                class="btn-add"
+                (click)="addExercise()"
+                [disabled]="!newExerciseName.trim()"
+              >
+                Add Exercise
+              </button>
+            </div>
+
+            <!-- Exercise Suggestions -->
+            <div class="suggestions" [class.show]="showSuggestions">
+              <div
+                class="suggestion-item"
+                *ngFor="let suggestion of filteredSuggestions"
+                (click)="selectSuggestion(suggestion)"
+              >
+                {{ suggestion }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercises List -->
+        <div class="exercises-list" *ngIf="currentExercises.length > 0">
+          <div
+            class="exercise-item"
+            *ngFor="let exercise of currentExercises; let i = index"
+          >
+            <div class="exercise-header">
+              <div class="exercise-info">
+                <h5>{{ exercise.name }}</h5>
+                <span class="sets-count">{{ exercise.sets.length }} sets</span>
+              </div>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removeExercise(i)"
+                title="Remove exercise"
+              >
+                🗑️
+              </button>
+            </div>
+
+            <!-- Add Set Form -->
+            <div class="add-set-form">
+              <div class="set-inputs">
+                <input
+                  type="number"
+                  placeholder="Reps"
+                  [(ngModel)]="exercise.tempReps"
+                  class="form-control"
+                  [ngModelOptions]="{ standalone: true }"
+                  min="1"
+                />
+                <input
+                  type="number"
+                  placeholder="Weight (kg)"
+                  [(ngModel)]="exercise.tempWeight"
+                  class="form-control"
+                  [ngModelOptions]="{ standalone: true }"
+                  min="0"
+                  step="0.5"
+                />
+                <button
+                  type="button"
+                  class="btn-success"
+                  (click)="addSetToExercise(i)"
+                  [disabled]="!exercise.tempReps || exercise.tempReps <= 0"
+                >
+                  Add Set
+                </button>
+              </div>
+            </div>
+
+            <!-- Sets List -->
+            <div
+              class="sets-list"
+              *ngIf="exercise.sets && exercise.sets.length > 0"
+            >
+              <div class="sets-header">
+                <span>Set</span>
+                <span>Reps</span>
+                <span>Weight (kg)</span>
+                <span>Action</span>
+              </div>
+
+              <div
+                class="set-row"
+                *ngFor="let set of exercise.sets; let setIndex = index"
+              >
+                <span class="set-number">{{ set.setNumber }}</span>
+                <span class="set-value">{{ set.reps }}</span>
+                <span class="set-value">{{ set.weight || "-" }}</span>
+                <button
+                  type="button"
+                  class="btn-remove-small"
+                  (click)="removeSetFromExercise(i, setIndex)"
+                  title="Remove set"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="no-sets"
+              *ngIf="!exercise.sets || exercise.sets.length === 0"
+            >
+              No sets added yet. Add your first set above!
+            </div>
+          </div>
+        </div>
+
+        <div class="no-exercises" *ngIf="currentExercises.length === 0">
+          <div class="empty-icon">🏋️‍♂️</div>
+          <h4>No exercises added yet</h4>
+          <p>Start by adding your first exercise using the form above</p>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="cancelWorkoutForm()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="
+            !workoutForm.valid || currentExercises.length === 0 || isLoading
+          "
+        >
+          {{
+            isLoading
+              ? "⏳ Saving..."
+              : editingWorkout
+              ? "💾 Update Workout"
+              : "🚀 Create Workout"
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Workouts List -->
+  <div class="workouts-list-section">
+    <div class="list-header">
+      <h3>📋 Your Workouts ({{ workouts.length }})</h3>
+      <div class="filter-options">
+        <select class="filter-select">
+          <option value="all">All Workouts</option>
+          <option value="recent">Recent</option>
+          <option value="favorites">Favorites</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Loading workouts...</p>
+    </div>
+
+    <!-- Workouts Grid -->
+    <div class="workouts-grid" *ngIf="!isLoading && workouts.length > 0">
+      <div class="workout-card" *ngFor="let workout of workouts">
+        <div class="workout-header">
+          <div class="workout-info">
+            <h4>{{ workout.name }}</h4>
+            <p class="workout-date">
+              {{ workout.createdAt | date : "MMM d, y - h:mm a" }}
+            </p>
+            <p class="workout-description">
+              {{ workout.description || "No description provided" }}
+            </p>
+          </div>
+
+          <div class="workout-actions">
+            <button
+              class="btn-edit"
+              (click)="editWorkout(workout)"
+              [disabled]="isLoading"
+              title="Edit workout"
+            >
+              ✏️
+            </button>
+            <button
+              class="btn-delete"
+              (click)="deleteWorkout(workout.id)"
+              [disabled]="isLoading"
+              title="Delete workout"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <!-- Workout Exercises Summary -->
+        <div
+          class="workout-exercises"
+          *ngIf="workout.exercises && workout.exercises.length > 0"
+        >
+          <h5>Exercises ({{ workout.exercises?.length || 0 }})</h5>
+          <div class="exercises-summary">
+            <div
+              class="exercise-summary"
+              *ngFor="let exercise of workout.exercises?.slice(0, 3)"
+            >
+              <div class="exercise-name">
+                <span class="exercise-icon">💪</span>
+                {{ exercise.name }}
+              </div>
+              <div class="exercise-sets">
+                {{ exercise.sets?.length || 0 }} sets
+                <span
+                  class="exercise-details"
+                  *ngIf="getTotalReps(exercise) > 0"
+                >
+                  {{ getTotalReps(exercise) }} reps
+                  <span *ngIf="getMaxWeight(exercise) > 0">
+                    • {{ getMaxWeight(exercise) }}kg max</span
+                  >
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="more-exercises"
+              *ngIf="(workout.exercises?.length || 0) > 3"
+            >
+              +{{ (workout.exercises?.length || 0) - 3 }} more exercises
+            </div>
+          </div>
+        </div>
+
+        <!-- Workout Stats -->
+        <div class="workout-stats">
+          <div class="stat-item">
+            <span class="stat-icon">🔢</span>
+            <div class="stat-content">
+              <span class="stat-label">Exercises</span>
+              <span class="stat-value">{{
+                workout.exercises?.length || 0
+              }}</span>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-icon">📊</span>
+            <div class="stat-content">
+              <span class="stat-label">Total Sets</span>
+              <span class="stat-value">{{ getTotalSets(workout) }}</span>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-icon">⏱️</span>
+            <div class="stat-content">
+              <span class="stat-label">Est. Duration</span>
+              <span class="stat-value"
+                >{{ getEstimatedDuration(workout) }}min</span
+              >
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <span class="stat-icon">⚖️</span>
+            <div class="stat-content">
+              <span class="stat-label">Volume</span>
+              <span class="stat-value">{{ getTotalVolume(workout) }}kg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Button -->
+        <div class="workout-footer">
+          <button class="btn-start-workout">🚀 Start This Workout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && workouts.length === 0">
+      <div class="empty-icon">🏋️‍♂️</div>
+      <h3>No workouts created yet</h3>
+      <p>
+        Create your first workout routine to get started with your fitness
+        journey!
+      </p>
+      <div class="empty-actions">
+        <button class="btn-primary" (click)="toggleWorkoutForm()">
+          🆕 Create Your First Workout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,169 @@
+<div class="dashboard-container">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Welcome to FitTracker! 💪</h1>
+      <p class="subtitle">Track your fitness journey and achieve your goals</p>
+    </div>
+    <button class="refresh-btn" (click)="refreshData()" [disabled]="isLoading">
+      {{ isLoading ? '⏳' : '🔄' }} Refresh
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content">
+    
+    <!-- Stats Overview Cards -->
+    <div class="stats-overview">
+      <div class="stat-card workouts">
+        <div class="stat-icon">💪</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ dashboardStats?.totalWorkouts || 0 }}</div>
+          <div class="stat-label">Total Workouts</div>
+          <div class="stat-trend positive">+{{ getWorkoutTrend() }}% this week</div>
+        </div>
+      </div>
+      
+      <div class="stat-card cardio">
+        <div class="stat-icon">🏃‍♂️</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ dashboardStats?.totalCardioSessions || 0 }}</div>
+          <div class="stat-label">Cardio Sessions</div>
+          <div class="stat-trend positive">+{{ getCardioTrend() }}% this week</div>
+        </div>
+      </div>
+      
+      <div class="stat-card time">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getTotalWorkoutTime() }}</div>
+          <div class="stat-label">Total Minutes</div>
+          <div class="stat-trend">{{ getWeeklyMinutes() }} this week</div>
+        </div>
+      </div>
+      
+      <div class="stat-card progress">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ getWeeklyGoalProgress() }}%</div>
+          <div class="stat-label">Weekly Goal</div>
+          <div class="stat-trend">{{ getGoalStatus() }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-grid">
+      
+      <!-- Recent Activities Section -->
+      <div class="activities-section">
+        <div class="section-header">
+          <h3>Recent Activities</h3>
+          <span class="activity-count">{{ recentActivities.length }} activities</span>
+        </div>
+        
+        <div class="activities-list">
+          <div 
+            class="activity-item"
+            [class]="activity.type"
+            *ngFor="let activity of recentActivities"
+          >
+            <div class="activity-icon">{{ activity.icon }}</div>
+            <div class="activity-details">
+              <h4>{{ activity.name }}</h4>
+              <p>{{ activity.description }}</p>
+              <small>{{ activity.date | date:'MMM d, h:mm a' }}</small>
+            </div>
+            <div class="activity-type-badge" [class]="activity.type">
+              {{ activity.type | titlecase }}
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-icon">🏋️‍♂️</div>
+          <h4>No activities yet</h4>
+          <p>Start your fitness journey by logging your first workout or cardio session!</p>
+          <div class="empty-actions">
+            <button class="btn-primary" (click)="navigateToWorkouts()">Start Workout</button>
+            <button class="btn-secondary" (click)="navigateToCardio()">Log Cardio</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Content -->
+      <div class="sidebar-content">
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h4>Quick Actions</h4>
+          <div class="action-buttons">
+            <button class="action-btn workout-btn" (click)="navigateToWorkouts()">
+              <span class="btn-icon">🏋️‍♂️</span>
+              <span class="btn-text">Start Workout</span>
+            </button>
+            
+            <button class="action-btn cardio-btn" (click)="navigateToCardio()">
+              <span class="btn-icon">🏃‍♂️</span>
+              <span class="btn-text">Log Cardio</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekly Goals Progress -->
+        <div class="weekly-goals">
+          <h4>This Week's Goals</h4>
+          
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-name">💪 Workout Sessions</span>
+              <span class="goal-percentage">{{ getWorkoutGoalPercentage() | number:'1.0-0' }}%</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-fill workout" [style.width.%]="getWorkoutGoalPercentage()"></div>
+            </div>
+            <div class="goal-target">3 workouts per week</div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-name">🏃‍♂️ Cardio Minutes</span>
+              <span class="goal-percentage">{{ getCardioGoalPercentage() | number:'1.0-0' }}%</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-fill cardio" [style.width.%]="getCardioGoalPercentage()"></div>
+            </div>
+            <div class="goal-target">150 minutes per week</div>
+          </div>
+
+          <div class="goal-item">
+            <div class="goal-header">
+              <span class="goal-name">📅 Active Days</span>
+              <span class="goal-percentage">{{ getActiveDaysPercentage() | number:'1.0-0' }}%</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-fill active" [style.width.%]="getActiveDaysPercentage()"></div>
+            </div>
+            <div class="goal-target">5 active days per week</div>
+          </div>
+        </div>
+
+        <!-- Motivational Quote -->
+        <div class="motivational-quote">
+          <h4>💡 Daily Motivation</h4>
+          <blockquote>
+            <p>"{{ currentQuote.text }}"</p>
+            <footer>— {{ currentQuote.author }}</footer>
+          </blockquote>
+          <button class="new-quote-btn" (click)="setRandomQuote()">New Quote</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

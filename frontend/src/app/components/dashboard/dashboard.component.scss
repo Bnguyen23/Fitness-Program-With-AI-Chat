@@ -1,0 +1,511 @@
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  min-height: calc(100vh - 80px);
+}
+
+// Header
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  .header-content {
+    h1 {
+      margin: 0 0 0.5rem;
+      color: #333;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  .refresh-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  display: none;
+  text-align: center;
+  padding: 4rem;
+  
+  &:only-child {
+    display: block;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(102, 126, 234, 0.1);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Stats Overview
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+
+    &.workouts {
+      border-left: 4px solid #667eea;
+    }
+
+    &.cardio {
+      border-left: 4px solid #f093fb;
+    }
+
+    &.time {
+      border-left: 4px solid #4facfe;
+    }
+
+    &.progress {
+      border-left: 4px solid #43e97b;
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+    }
+
+    .stat-content {
+      flex: 1;
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-trend {
+        font-size: 0.85rem;
+        color: #999;
+
+        &.positive {
+          color: #43e97b;
+        }
+      }
+    }
+  }
+}
+
+// Main Grid
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Activities Section
+.activities-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+
+    h3 {
+      margin: 0;
+      color: #333;
+      font-size: 1.25rem;
+    }
+
+    .activity-count {
+      background: #f0f2f5;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  }
+
+  .activities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &:empty {
+      display: none;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+      }
+
+      &.workout {
+        border-left: 3px solid #667eea;
+      }
+
+      &.cardio {
+        border-left: 3px solid #f093fb;
+      }
+
+      .activity-icon {
+        font-size: 1.5rem;
+      }
+
+      .activity-details {
+        flex: 1;
+
+        h4 {
+          margin: 0 0 0.25rem;
+          color: #333;
+          font-size: 1rem;
+        }
+
+        p {
+          margin: 0 0 0.25rem;
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        small {
+          color: #999;
+          font-size: 0.8rem;
+        }
+      }
+
+      .activity-type-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+
+        &.workout {
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+        }
+
+        &.cardio {
+          background: rgba(240, 147, 251, 0.1);
+          color: #f093fb;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+
+    .activities-list:empty + & {
+      display: block;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    h4 {
+      margin: 0 0 0.5rem;
+      color: #333;
+    }
+
+    p {
+      margin: 0 0 1.5rem;
+      color: #666;
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+
+      .btn-primary,
+      .btn-secondary {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+      }
+
+      .btn-secondary {
+        background: #e9ecef;
+        color: #495057;
+
+        &:hover {
+          background: #dee2e6;
+        }
+      }
+    }
+  }
+}
+
+// Sidebar Content
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// Quick Actions
+.quick-actions {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  h4 {
+    margin: 0 0 1rem;
+    color: #333;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+
+      .btn-icon {
+        font-size: 1.5rem;
+      }
+
+      .btn-text {
+        font-weight: 600;
+      }
+
+      &.workout-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        &:hover {
+          transform: translateX(5px);
+        }
+      }
+
+      &.cardio-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+
+        &:hover {
+          transform: translateX(5px);
+        }
+      }
+    }
+  }
+}
+
+// Weekly Goals
+.weekly-goals {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  h4 {
+    margin: 0 0 1.5rem;
+    color: #333;
+  }
+
+  .goal-item {
+    margin-bottom: 1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .goal-name {
+        font-size: 0.9rem;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .goal-percentage {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 600;
+      }
+    }
+
+    .goal-progress {
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+
+      .progress-fill {
+        height: 100%;
+        transition: width 0.5s ease;
+
+        &.workout {
+          background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        &.cardio {
+          background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+
+        &.active {
+          background: linear-gradient(90deg, #43e97b, #38f9d7);
+        }
+      }
+    }
+
+    .goal-target {
+      font-size: 0.8rem;
+      color: #999;
+    }
+  }
+}
+
+// Motivational Quote
+.motivational-quote {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: white;
+
+  h4 {
+    margin: 0 0 1rem;
+    color: white;
+    font-size: 1rem;
+  }
+
+  blockquote {
+    margin: 0 0 1rem;
+    padding: 0;
+
+    p {
+      margin: 0 0 0.5rem;
+      font-style: italic;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+  }
+
+  .new-quote-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}

@@ -1,0 +1,159 @@
+<div class="cardio-container">
+  <div class="header-section">
+    <h2>Cardio Tracker</h2>
+    <div class="stats-cards">
+      <div class="stat-card">
+        <h3>Total Duration</h3>
+        <p class="stat-value">{{ getTotalDuration() }} min</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Calories</h3>
+        <p class="stat-value">{{ getTotalCalories() }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Weekly Goal</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getWeeklyGoalProgress()"></div>
+        </div>
+        <p class="stat-value">{{ getWeeklyGoalProgress().toFixed(0) }}%</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Add Cardio Form -->
+    <div class="form-section">
+      <h3>Log Cardio Session</h3>
+      <form [formGroup]="cardioForm" (ngSubmit)="onSubmit()" class="cardio-form">
+        <div class="form-group">
+          <label for="type">Exercise Type</label>
+          <select id="type" formControlName="type" class="form-control">
+            <option value="">Select exercise type</option>
+            <option *ngFor="let type of cardioTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duration (minutes)</label>
+            <input 
+              type="number" 
+              id="duration" 
+              formControlName="duration" 
+              class="form-control"
+              placeholder="30"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="distance">Distance (optional)</label>
+            <input 
+              type="number" 
+              id="distance" 
+              formControlName="distance" 
+              class="form-control"
+              placeholder="5.0"
+              step="0.1"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="calories">Calories (optional)</label>
+            <input 
+              type="number" 
+              id="calories" 
+              formControlName="calories" 
+              class="form-control"
+              placeholder="300"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input 
+              type="date" 
+              id="date" 
+              formControlName="date" 
+              class="form-control"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes (optional)</label>
+          <textarea 
+            id="notes" 
+            formControlName="notes" 
+            class="form-control"
+            rows="3"
+            placeholder="How did it feel? Any observations..."
+          ></textarea>
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [disabled]="!cardioForm.valid || isLoading"
+        >
+          {{ isLoading ? 'Adding...' : 'Log Session' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Cardio Sessions List -->
+    <div class="sessions-section">
+      <h3>Recent Sessions</h3>
+      <div class="sessions-list" *ngIf="!isLoading; else loadingTemplate">
+        <div 
+          *ngFor="let session of cardioSessions" 
+          class="session-card"
+        >
+          <div class="session-header">
+            <h4>{{ session.type }}</h4>
+            <span class="session-date">{{ session.date | date:'MMM d, y' }}</span>
+          </div>
+          
+          <div class="session-details">
+            <div class="detail-item">
+              <span class="label">Duration:</span>
+              <span class="value">{{ session.duration }} min</span>
+            </div>
+            
+            <div class="detail-item" *ngIf="session.distance">
+              <span class="label">Distance:</span>
+              <span class="value">{{ session.distance }} km</span>
+            </div>
+            
+            <div class="detail-item" *ngIf="session.calories">
+              <span class="label">Calories:</span>
+              <span class="value">{{ session.calories }}</span>
+            </div>
+          </div>
+
+          <div class="session-notes" *ngIf="session.notes">
+            <p>{{ session.notes }}</p>
+          </div>
+
+          <div class="session-actions">
+            <button 
+              class="btn-danger btn-small"
+              (click)="deleteCardioSession(session.id)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="cardioSessions.length === 0" class="empty-state">
+          <p>No cardio sessions logged yet. Start by adding your first session!</p>
+        </div>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading">Loading sessions...</div>
+      </ng-template>
+    </div>
+  </div>
+</div>
